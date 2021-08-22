@@ -107,12 +107,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
-   LPCTSTR wword = TEXT("AAAAAAAASD");
+/*
    HDC hdc;
    hdc = GetDC(hWnd);
-   TextOut(hdc, 10, 10, wword, lstrlen(wword));
+   TextOut(hdc, 10, 10, TEXT("AAAAAAAASD"), sizeof("AAAAAAAASD") - 1);
    ReleaseDC(hWnd,hdc);
-
+*/
    return TRUE;
 }
 
@@ -128,6 +128,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+
+    LPCTSTR word = TEXT("AASNNNNNN");
+
     switch (message)
     {
     case WM_COMMAND:
@@ -151,6 +154,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
+            TextOut(hdc, 10, 10, word, lstrlen(word));
             // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
         }
