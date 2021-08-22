@@ -128,8 +128,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
-    LPCTSTR word = TEXT("AASNNNNNN");
+    RECT rc;
+    PAINTSTRUCT ps;
+    LPCTSTR word = TEXT("君が代は千代に八千代にさざれ石の\n巌となりて苔の生すまで");
 
     switch (message)
     {
@@ -152,9 +153,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
+            GetClientRect(hWnd, &rc);
             HDC hdc = BeginPaint(hWnd, &ps);
-            TextOut(hdc, 10, 10, word, lstrlen(word));
+            DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
+            //TextOut(hdc, 10, 10, word, lstrlen(word));
             // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
         }
