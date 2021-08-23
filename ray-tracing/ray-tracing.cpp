@@ -163,6 +163,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SetPixelV(hdc, x, y, RGB(r, g, b));
             }
             EndPaint(hWnd, &ps);
+            MessageBox(hWnd, TEXT("終了"), TEXT("描画の終了です"), MB_OKCANCEL);
         }
         break;
     case WM_DESTROY:
