@@ -134,6 +134,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     WCHAR Y[] = L"Input";
     LPWSTR X = Y;
     DRAWTEXTPARAMS dtp;
+    int font;
 
     switch (message)
     {
@@ -156,16 +157,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            GetClientRect(hWnd, &rc);
-            dtp.cbSize = sizeof(DRAWTEXTPARAMS);
-            dtp.iLeftMargin = 20;
-            dtp.iRightMargin = 20;
-            dtp.iTabLength = 4;
-
             HDC hdc = BeginPaint(hWnd, &ps);
+            GetClientRect(hWnd, &rc);
+
+            SelectObject(hdc, GetStockObject(11));
+
+
             SetTextColor(hdc, RGB(255, 0, 255));
-            DrawTextEx(hdc, X, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp);
-            //DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
+            //DrawTextEx(hdc, X, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp);
+            DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
             //TextOut(hdc, 10, 10, word, lstrlen(word));
             // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
