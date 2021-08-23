@@ -131,6 +131,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     RECT rc;
     PAINTSTRUCT ps;
     LPCTSTR word = TEXT("君が代は千代に八千代にさざれ石の\n巌となりて苔の生すまで");
+    WCHAR Y[] = L"Input";
+    LPWSTR X = Y;
+    DRAWTEXTPARAMS dtp;
 
     switch (message)
     {
@@ -154,8 +157,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         {
             GetClientRect(hWnd, &rc);
+            dtp.cbSize = sizeof(DRAWTEXTPARAMS);
+            dtp.iLeftMargin = 20;
+            dtp.iRightMargin = 20;
+            dtp.iTabLength = 4;
+
             HDC hdc = BeginPaint(hWnd, &ps);
-            DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
+            SetTextColor(hdc, RGB(255, 0, 255));
+            DrawTextEx(hdc, X, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp);
+            //DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
             //TextOut(hdc, 10, 10, word, lstrlen(word));
             // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
