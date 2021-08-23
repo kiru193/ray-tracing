@@ -124,7 +124,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
-    HPEN hPen1, hPen2, hPen3;
+    POINT pt[4];
+    pt[0].x = 0;
+    pt[0].y = 0;
+    pt[1].x = 400;
+    pt[1].y = 400;
+    pt[2].x = 400;
+    pt[2].y = 0;
+    pt[3].x = 0;
+    pt[3].y = 400;
 
     switch (message)
     {
@@ -152,24 +160,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-            hPen1 = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
-            SelectObject(hdc, hPen1);
-            MoveToEx(hdc, 20, 20, NULL);
-            LineTo(hdc, 250, 20);
-
-            hPen2 = CreatePen(PS_DASH, 0, RGB(255, 0, 0));
-            SelectObject(hdc, hPen2);
-            MoveToEx(hdc, 20, 40, NULL);
-            LineTo(hdc, 250, 40);
-
-            hPen3 = CreatePen(PS_DOT, 0, RGB(255, 0, 0));
-            SelectObject(hdc, hPen3);
-            MoveToEx(hdc, 20, 60, NULL);
-            LineTo(hdc, 250, 60);            
-            
-            DeleteObject(hPen1);
-            DeleteObject(hPen2);
-            DeleteObject(hPen3);
+            Polyline(hdc, pt, sizeof(pt)/sizeof(pt[0]));
+            TCHAR szBuf[256];
+            wsprintf(szBuf, TEXT("%d %d"), sizeof(pt), sizeof(pt[0]));
+            MessageBox(hWnd, szBuf, TEXT("aa"), MB_OK);
             EndPaint(hWnd, &ps);
         }
         break;
