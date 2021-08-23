@@ -16,6 +16,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName);
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -107,12 +108,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
-/*
-   HDC hdc;
-   hdc = GetDC(hWnd);
-   TextOut(hdc, 10, 10, TEXT("AAAAAAAASD"), sizeof("AAAAAAAASD") - 1);
-   ReleaseDC(hWnd,hdc);
-*/
    return TRUE;
 }
 
@@ -128,12 +123,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static HFONT hFont1, hFont2, hFont3;
     RECT rc;
     PAINTSTRUCT ps;
-    LPCTSTR word = TEXT("君が代は千代に八千代にさざれ石の\n巌となりて苔の生すまで");
-    WCHAR Y[] = L"Input";
-    LPWSTR X = Y;
-    DRAWTEXTPARAMS dtp;
+    LPCTSTR word1 = TEXT("君が代は千代に八千代にさざれ石の\n巌となりて苔の生すまで\n");
+    LPCTSTR word2 = TEXT("Winter Cab View from two of the most SCENIC RAILWAYS in the WORLD\n");
     int font;
 
     switch (message)
@@ -155,17 +149,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    case WM_CREATE:
+        hFont1 = MyCreateFont(40, SHIFTJIS_CHARSET, TEXT("HG行書体"));
+        hFont2 = MyCreateFont(40, ANSI_CHARSET, TEXT("Broadway"));
+        hFont3 = MyCreateFont(40, SHIFTJIS_CHARSET, TEXT("ＭＳ 明朝"));
     case WM_PAINT:
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             GetClientRect(hWnd, &rc);
-
-            SelectObject(hdc, GetStockObject(11));
-
-
             SetTextColor(hdc, RGB(255, 0, 255));
-            //DrawTextEx(hdc, X, -1, &rc, DT_WORDBREAK | DT_EXPANDTABS | DT_TABSTOP, &dtp);
-            DrawText(hdc, word, -1, &rc, DT_CENTER | DT_WORDBREAK);
+
+            SelectObject(hdc, hFont1);
+            //DrawText(hdc, word1, -1, &rc, DT_CENTER | DT_WORDBREAK);
+            TextOut(hdc, 0, 0, word1, lstrlen(word1));
+
+            SelectObject(hdc, hFont2);
+            TextOut(hdc, 0, 60, word2, lstrlen(word2));
+            //DrawText(hdc, word2, -1, &rc, DT_CENTER | DT_WORDBREAK);
+
+            SelectObject(hdc, hFont3);
+            TextOut(hdc, 0, 120, word1, lstrlen(word1));
+            //DrawText(hdc, word1, -1, &rc, DT_CENTER | DT_WORDBREAK);
+
             //TextOut(hdc, 10, 10, word, lstrlen(word));
             // TODO: HDC を使用する描画コードをここに追加してください...
             EndPaint(hWnd, &ps);
@@ -198,4 +203,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+HFONT MyCreateFont(int nHeight, DWORD dwCharSet, LPCTSTR lpName) {
+    return(CreateFont(nHeight, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, dwCharSet, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, lpName));
 }
