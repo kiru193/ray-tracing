@@ -37,6 +37,9 @@
     <ResourceCompile Include="ray-tracing.rc">
       <Filter>リソース ファイル</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="picture.rc">
+      <Filter>リソース ファイル</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
@@ -45,5 +48,11 @@
     <Image Include="ray-tracing.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
+    <Image Include="mana1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
   </ItemGroup>
 </Project>

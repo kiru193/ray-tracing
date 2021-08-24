@@ -124,12 +124,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
-    int i01dMode;
-    HPEN hPen, h01dPen;
-    HBRUSH hBrush, h01dBrush;
-    COLORREF cr01dColor;
-    RECT rc1 = { 30,30,210,50 }, rc2{ 30,50,210,110 };
-    LPCTSTR lpszTxt1 = TEXT("猫はいます"), lpszTxt2 = TEXT("やっぱり\n猫はいませんでした\nいます");
+	HDC hdc_men;
+	HBITMAP hBmp;
+	BITMAP bmp_info;
+	int w, h;
 
     switch (message)
     {
@@ -157,25 +155,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-            hPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
-            h01dPen = (HPEN)SelectObject(hdc, hPen);
-            hBrush = CreateSolidBrush(RGB(255, 200, 255));
-            h01dBrush = (HBRUSH)SelectObject(hdc, hBrush);
-
-            RoundRect(hdc, 20, 20, 220, 120, 10, 10);
-
-            cr01dColor = SetTextColor(hdc, RGB(0, 0, 255));
-            DrawText(hdc, lpszTxt1, -1, &rc1, DT_CENTER);
-            i01dMode = SetBkMode(hdc, TRANSPARENT);
-            DrawText(hdc, lpszTxt2, -1, &rc2, DT_CENTER);
-
-            DeleteObject(hPen);
-            DeleteObject(hBrush);
-
-            SelectObject(hdc, h01dPen);
-            SelectObject(hdc, h01dBrush);
-            SetTextColor(hdc, cr01dColor);
-            SetBkMode(hdc, i01dMode);
+			hBmp = LoadBitmap(hInst, TEXT("MYBMP"));
+			GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得
+			w = bmp_info.bmWidth;
+			h = bmp_info.bmHeight;
+			hdc_men = CreateCompatibleDC(hdc);//メモリデバイスコンテキストやらを生成
+			SelectObject(hdc_men, hBmp);
+			BitBlt(hdc, 0, 0, w, h, hdc_men, 0, 0, SRCCOPY);
+			StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
+			DeleteDC(hdc_men);
+			DeleteObject(hBmp);
 
             EndPaint(hWnd, &ps);
         }
