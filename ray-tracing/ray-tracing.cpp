@@ -124,8 +124,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
+    int i01dMode;
     HPEN hPen, h01dPen;
-    HBRUSH hBrush, h01Brush;
+    HBRUSH hBrush, h01dBrush;
+    COLORREF cr01dColor;
+    RECT rc1 = { 30,30,210,50 }, rc2{ 30,50,210,110 };
+    LPCTSTR lpszTxt1 = TEXT("猫はいます"), lpszTxt2 = TEXT("やっぱり\n猫はいませんでした\nいます");
 
     switch (message)
     {
@@ -153,40 +157,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-            hPen = CreatePen(PS_SOLID, 0, RGB(255, 0, 0));//枠線の色
+            hPen = CreatePen(PS_NULL, 0, RGB(0, 0, 0));
             h01dPen = (HPEN)SelectObject(hdc, hPen);
-            hBrush = CreateSolidBrush(RGB(255, 0, 0));
-            h01Brush = (HBRUSH)SelectObject(hdc, hBrush); 
-            Rectangle(hdc, 10, 10, 100, 100);
-            DeleteObject(hBrush);
+            hBrush = CreateSolidBrush(RGB(255, 200, 255));
+            h01dBrush = (HBRUSH)SelectObject(hdc, hBrush);
 
-            hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(255, 0, 0));//中身の塗りつぶし方についての設定
-            SelectObject(hdc, hBrush);
-            Rectangle(hdc, 50, 50, 150, 150);
-            DeleteObject(hBrush);
+            RoundRect(hdc, 20, 20, 220, 120, 10, 10);
 
-            hBrush = CreateHatchBrush(HS_FDIAGONAL, RGB(0, 0, 255));
-            SelectObject(hdc, hBrush);
-            Rectangle(hdc, 100, 100, 200, 200);
-            DeleteObject(hBrush);
+            cr01dColor = SetTextColor(hdc, RGB(0, 0, 255));
+            DrawText(hdc, lpszTxt1, -1, &rc1, DT_CENTER);
+            i01dMode = SetBkMode(hdc, TRANSPARENT);
+            DrawText(hdc, lpszTxt2, -1, &rc2, DT_CENTER);
 
-            hBrush = CreateHatchBrush(HS_CROSS, RGB(255, 0, 255));
-            SelectObject(hdc,hBrush);
-            Rectangle(hdc, 150, 150, 250, 250);
-            DeleteObject(hBrush);
-
-            hBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(255, 255, 0));
-            SelectObject(hdc, hBrush);
-            Rectangle(hdc, 200, 200, 300, 300);
-            DeleteObject(hBrush);
-
-            hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);//中をすかすやつ
-            SelectObject(hdc, hBrush);
-            Rectangle(hdc, 250, 250, 350, 350);
             DeleteObject(hPen);
+            DeleteObject(hBrush);
 
             SelectObject(hdc, h01dPen);
-            SelectObject(hdc, h01Brush);
+            SelectObject(hdc, h01dBrush);
+            SetTextColor(hdc, cr01dColor);
+            SetBkMode(hdc, i01dMode);
 
             EndPaint(hWnd, &ps);
         }
