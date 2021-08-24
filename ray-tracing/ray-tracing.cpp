@@ -124,15 +124,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
-    POINT pt[4];
-    pt[0].x = 0;
-    pt[0].y = 0;
-    pt[1].x = 400;
-    pt[1].y = 400;
-    pt[2].x = 400;
-    pt[2].y = 0;
-    pt[3].x = 0;
-    pt[3].y = 400;
+    HPEN hPen, h01dPen;
+    HBRUSH hBrush, h01Brush;
 
     switch (message)
     {
@@ -160,10 +153,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-            Polyline(hdc, pt, sizeof(pt)/sizeof(pt[0]));
-            TCHAR szBuf[256];
-            wsprintf(szBuf, TEXT("%d %d"), sizeof(pt), sizeof(pt[0]));
-            MessageBox(hWnd, szBuf, TEXT("aa"), MB_OK);
+            hPen = CreatePen(PS_SOLID, 0, RGB(255, 0, 0));//枠線の色
+            h01dPen = (HPEN)SelectObject(hdc, hPen);
+            hBrush = CreateSolidBrush(RGB(255, 0, 0));
+            h01Brush = (HBRUSH)SelectObject(hdc, hBrush); 
+            Rectangle(hdc, 10, 10, 100, 100);
+            DeleteObject(hBrush);
+
+            hBrush = CreateHatchBrush(HS_BDIAGONAL, RGB(255, 0, 0));//中身の塗りつぶし方についての設定
+            SelectObject(hdc, hBrush);
+            Rectangle(hdc, 50, 50, 150, 150);
+            DeleteObject(hBrush);
+
+            hBrush = CreateHatchBrush(HS_FDIAGONAL, RGB(0, 0, 255));
+            SelectObject(hdc, hBrush);
+            Rectangle(hdc, 100, 100, 200, 200);
+            DeleteObject(hBrush);
+
+            hBrush = CreateHatchBrush(HS_CROSS, RGB(255, 0, 255));
+            SelectObject(hdc,hBrush);
+            Rectangle(hdc, 150, 150, 250, 250);
+            DeleteObject(hBrush);
+
+            hBrush = CreateHatchBrush(HS_DIAGCROSS, RGB(255, 255, 0));
+            SelectObject(hdc, hBrush);
+            Rectangle(hdc, 200, 200, 300, 300);
+            DeleteObject(hBrush);
+
+            hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);//中をすかすやつ
+            SelectObject(hdc, hBrush);
+            Rectangle(hdc, 250, 250, 350, 350);
+            DeleteObject(hPen);
+
+            SelectObject(hdc, h01dPen);
+            SelectObject(hdc, h01Brush);
+
             EndPaint(hWnd, &ps);
         }
         break;
