@@ -155,7 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-			hBmp = LoadBitmap(hInst, TEXT("MYBMP"));
+			hBmp = LoadBitmap(hInst, TEXT("MYBMP2"));
 			GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得
 			w = bmp_info.bmWidth;
 			h = bmp_info.bmHeight;

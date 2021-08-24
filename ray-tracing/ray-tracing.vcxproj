@@ -152,7 +152,6 @@
     <ResourceCompile Include="ray-tracing.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="mana1.bmp" />
     <Image Include="ray-tracing.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
