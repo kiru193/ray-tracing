@@ -148,10 +148,11 @@
     <ClCompile Include="ray-tracing.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="picture.rc" />
     <ResourceCompile Include="ray-tracing.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="picture\mana1.bmp" />
+    <Image Include="picture\mana2.bmp" />
     <Image Include="ray-tracing.ico" />
     <Image Include="small.ico" />
   </ItemGroup>

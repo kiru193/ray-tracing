@@ -37,15 +37,18 @@
     <ResourceCompile Include="ray-tracing.rc">
       <Filter>リソース ファイル</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="picture.rc">
-      <Filter>リソース ファイル</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="ray-tracing.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="picture\mana1.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="picture\mana2.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
   </ItemGroup>

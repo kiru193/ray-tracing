@@ -11,6 +11,8 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
+HDC hdc_mem1, hdc_mem2;
+int show_no = 1;
 
 // このコード モジュールに含まれる関数の宣言を転送します:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -123,11 +125,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	HDC hdc;
     PAINTSTRUCT ps;
-	HDC hdc_men;
+	HDC hdc_memx = hdc_mem1;
 	HBITMAP hBmp;
-	BITMAP bmp_info;
-	int w, h;
 
     switch (message)
     {
@@ -143,28 +144,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
+			case ID_PICTURE_32771:
+				show_no = 1;
+				InvalidateRect(hWnd, NULL, TRUE);
+				break;
+			case ID_PICTURE_32772:
+				show_no = 2;
+				InvalidateRect(hWnd, NULL, TRUE);
+				break;
+
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
         break;
     case WM_CREATE:
-        srand((unsigned)time(NULL));
+			hdc = GetDC(hWnd);
+		hBmp = LoadBitmap(hInst, TEXT("MANA1"));
+		hdc_mem1 = CreateCompatibleDC(hdc);
+		SelectObject(hdc_mem1, hBmp);
+		DeleteObject(hBmp);
+
+        hBmp = LoadBitmap(hInst, TEXT("MANA2"));
+		hdc_mem2 = CreateCompatibleDC(hdc);
+		SelectObject(hdc_mem2, hBmp);
+		DeleteObject(hBmp);
+        
+        ReleaseDC(hWnd, hdc);
+
         break;
     case WM_PAINT:
         {
-            HDC hdc = BeginPaint(hWnd, &ps);
+            hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-			hBmp = LoadBitmap(hInst, TEXT("MYBMP2"));
-			GetObject(hBmp, (int)sizeof(BITMAP), &bmp_info);//bitmap画像の取得
-			w = bmp_info.bmWidth;
-			h = bmp_info.bmHeight;
-			hdc_men = CreateCompatibleDC(hdc);//メモリデバイスコンテキストやらを生成
-			SelectObject(hdc_men, hBmp);
-			BitBlt(hdc, 0, 0, w, h, hdc_men, 0, 0, SRCCOPY);
-			StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
-			DeleteDC(hdc_men);
-			DeleteObject(hBmp);
+			if (show_no == 1)
+				hdc_memx = hdc_mem1;
+			if (show_no == 2)
+				hdc_memx = hdc_mem2;
+			BitBlt(ps.hdc, ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top, hdc_memx, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
 
             EndPaint(hWnd, &ps);
         }
