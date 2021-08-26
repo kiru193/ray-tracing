@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "ray-tracing.h"
+#include <windows.h>
+#include <Mmsystem.h>
 #include <time.h>
 
 #define MAX_LOADSTRING 100
@@ -11,14 +13,19 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
-HDC hdc_mem1, hdc_mem2;
-int show_no = 1;
 
 // このコード モジュールに含まれる関数の宣言を転送します:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+int TypeStart(HWND);
+
+TCHAR szClassName[] = TEXT("ket01");
+TCHAR szMondai[32], szInput[32], szCheck[32];
+int iMon;
+DWORD dwStart, dwEnd;
+BOOL bStart = FALSE, bSeikai = TRUE;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -127,8 +134,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
     PAINTSTRUCT ps;
-	HDC hdc_memx = hdc_mem1;
-	HBITMAP hBmp;
+	static HMENU hMenu;
+	MMTIME mm;
 
     switch (message)
     {
@@ -142,47 +149,63 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
             case IDM_EXIT:
-				//SendMessage(hWnd, WM_CLOSE, 0, 0);
-                //DestroyWindow(hWnd);
+                DestroyWindow(hWnd);
                 break;
-			case ID_PICTURE_32771:
-				show_no = 1;
-				InvalidateRect(hWnd, NULL, TRUE);
-				break;
-			case ID_PICTURE_32772:
-				show_no = 2;
-				InvalidateRect(hWnd, NULL, TRUE);
-				break;
 
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
         break;
-    case WM_CREATE:
-			hdc = GetDC(hWnd);
-		hBmp = LoadBitmap(hInst, TEXT("MANA1"));
-		hdc_mem1 = CreateCompatibleDC(hdc);
-		SelectObject(hdc_mem1, hBmp);
-		DeleteObject(hBmp);
+	case WM_CREATE:
+			srand((unsigned)time(NULL));
+		    hMenu = GetMenu(hWnd);
+			break;
+	case WM_CHAR:
+		if (wParam == VK_SPACE && !bStart) {
+			bStart = TRUE;
+			TypeStart(hWnd);
+			break;
+        }
+		if (bStart == FALSE)
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		if (wParam == VK_ESCAPE) {
+			wsprintf(szMondai, TEXT(" "));
+			lstrcpy(szInput, TEXT(" "));
+			lstrcpy(szCheck, TEXT(" "));
+			InvalidateRect(hWnd, NULL, TRUE);
+			bStart = FALSE;
+			break;
+        }
+		wsprintf(szInput, TEXT("あなたの入力 = \"%c\" "), (int)wParam);
+		if (iMon == (int)wParam) {
+			bSeikai = TRUE;
 
-        hBmp = LoadBitmap(hInst, TEXT("MANA2"));
-		hdc_mem2 = CreateCompatibleDC(hdc);
-		SelectObject(hdc_mem2, hBmp);
-		DeleteObject(hBmp);
-        
-        ReleaseDC(hWnd, hdc);
+            mm.wType = TIME_MS;
+			timeGetSystemTime(&mm, sizeof(MMTIME));
+			dwEnd = mm.u.ms;
 
-        break;
+            wsprintf(szCheck, TEXT("反応時間[%d ミリ秒]"), dwEnd - dwStart);
+			TypeStart(hWnd);
+		}
+		else {
+			bSeikai = FALSE;
+			MessageBeep(MB_OK);
+			lstrcpy(szCheck, TEXT("タイプミス！"));
+		}
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
     case WM_PAINT:
         {
             hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-			if (show_no == 1)
-				hdc_memx = hdc_mem1;
-			if (show_no == 2)
-				hdc_memx = hdc_mem2;
-			BitBlt(ps.hdc, ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top, hdc_memx, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);
+			TextOut(hdc, 0, 0, szMondai, lstrlen(szMondai));
+			TextOut(hdc, 0, 40, szInput, lstrlen(szInput));
+			if (bSeikai)
+				SetTextColor(hdc, RGB(0, 0, 0));
+			else
+				SetTextColor(hdc, RGB(255, 0, 0));
+			TextOut(hdc, 0, 80, szCheck, lstrlen(szCheck));
 
             EndPaint(hWnd, &ps);
         }
@@ -214,4 +237,20 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+int TypeStart(HWND hWnd) {
+	int n;
+	MMTIME mm;
+
+    n = rand() % 26;
+	iMon = 'a' + n;
+	wsprintf(szMondai, TEXT("問題 = \"%c\" "), iMon);
+
+    mm.wType = TIME_MS;
+	timeGetSystemTime(&mm, sizeof(MMTIME));
+	dwStart = mm.u.ms;
+	
+    InvalidateRect(hWnd, NULL, TRUE);
+	return 0;
 }
