@@ -3,8 +3,6 @@
 
 #include "framework.h"
 #include "ray-tracing.h"
-#include <windows.h>
-#include <Mmsystem.h>
 #include <time.h>
 
 #define MAX_LOADSTRING 100
@@ -19,13 +17,10 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-int TypeStart(HWND);
 
-TCHAR szClassName[] = TEXT("ket01");
-TCHAR szMondai[32], szInput[32], szCheck[32];
-int iMon;
-DWORD dwStart, dwEnd;
-BOOL bStart = FALSE, bSeikai = TRUE;
+void DrawRect(HWND, POINTS, POINTS);
+TCHAR szClassName[] = TEXT("mouse01");
+POINTS start, end, oldend;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -134,8 +129,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HDC hdc;
     PAINTSTRUCT ps;
-	static HMENU hMenu;
-	MMTIME mm;
+
+    TCHAR szBuf[32];
+	HBRUSH hBrush;
+	static BOOL bDraw;
 
     switch (message)
     {
@@ -157,56 +154,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
-	case WM_CREATE:
-			srand((unsigned)time(NULL));
-		    hMenu = GetMenu(hWnd);
-			break;
-	case WM_CHAR:
-		if (wParam == VK_SPACE && !bStart) {
-			bStart = TRUE;
-			TypeStart(hWnd);
-			break;
-        }
-		if (bStart == FALSE)
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		if (wParam == VK_ESCAPE) {
-			wsprintf(szMondai, TEXT(" "));
-			lstrcpy(szInput, TEXT(" "));
-			lstrcpy(szCheck, TEXT(" "));
-			InvalidateRect(hWnd, NULL, TRUE);
-			bStart = FALSE;
-			break;
-        }
-		wsprintf(szInput, TEXT("あなたの入力 = \"%c\" "), (int)wParam);
-		if (iMon == (int)wParam) {
-			bSeikai = TRUE;
-
-            mm.wType = TIME_MS;
-			timeGetSystemTime(&mm, sizeof(MMTIME));
-			dwEnd = mm.u.ms;
-
-            wsprintf(szCheck, TEXT("反応時間[%d ミリ秒]"), dwEnd - dwStart);
-			TypeStart(hWnd);
+	case WM_LBUTTONDOWN:
+		bDraw = TRUE;
+		oldend = start = MAKEPOINTS(lParam);
+		DrawRect(hWnd, start, oldend);
+		break;
+	case WM_MOUSEMOVE:
+		if (bDraw) {
+			end = MAKEPOINTS(lParam);
+			DrawRect(hWnd, start, oldend);
+			DrawRect(hWnd, start, end);
+			oldend = end;
 		}
 		else {
-			bSeikai = FALSE;
-			MessageBeep(MB_OK);
-			lstrcpy(szCheck, TEXT("タイプミス！"));
-		}
-		InvalidateRect(hWnd, NULL, TRUE);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+        }
 		break;
+	case WM_LBUTTONUP:
+		if (bDraw) {
+			SetCursor(LoadCursor(NULL, IDC_ARROW));
+			DrawRect(hWnd, start, end);
+			bDraw = FALSE;
+
+            wsprintf(szBuf, TEXT("(%d,%d)-(%d,%d)"), start.x, start.y, end.x, end.y);
+			SetWindowText(hWnd, szBuf);
+			hdc = GetDC(hWnd);
+			hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
+			SelectObject(hdc, hBrush);
+			Ellipse(hdc, start.x, start.y, end.x, end.y);
+			ReleaseDC(hWnd, hdc);
+		}
+		else {
+			return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+		break;
+    case WM_CREATE:
+
+			break;
     case WM_PAINT:
         {
             hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
-			TextOut(hdc, 0, 0, szMondai, lstrlen(szMondai));
-			TextOut(hdc, 0, 40, szInput, lstrlen(szInput));
-			if (bSeikai)
-				SetTextColor(hdc, RGB(0, 0, 0));
-			else
-				SetTextColor(hdc, RGB(255, 0, 0));
-			TextOut(hdc, 0, 80, szCheck, lstrlen(szCheck));
-
             EndPaint(hWnd, &ps);
         }
         break;
@@ -239,18 +227,15 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-int TypeStart(HWND hWnd) {
-	int n;
-	MMTIME mm;
+void DrawRect(HWND hWnd, POINTS beg, POINTS end) {
+	HDC hdc;
+	hdc = GetDC(hWnd);
+	SetROP2(hdc, R2_NOT);
 
-    n = rand() % 26;
-	iMon = 'a' + n;
-	wsprintf(szMondai, TEXT("問題 = \"%c\" "), iMon);
-
-    mm.wType = TIME_MS;
-	timeGetSystemTime(&mm, sizeof(MMTIME));
-	dwStart = mm.u.ms;
-	
-    InvalidateRect(hWnd, NULL, TRUE);
-	return 0;
+    MoveToEx(hdc, beg.x, beg.y, NULL);
+	LineTo(hdc, end.x, beg.y);
+	LineTo(hdc, end.x, end.y);
+	LineTo(hdc, beg.x, end.y);
+	LineTo(hdc, beg.x, beg.y);
+	LineTo(hdc, end.x, end.y);
 }
