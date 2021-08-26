@@ -142,7 +142,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
             case IDM_EXIT:
-                DestroyWindow(hWnd);
+				//SendMessage(hWnd, WM_CLOSE, 0, 0);
+                //DestroyWindow(hWnd);
                 break;
 			case ID_PICTURE_32771:
 				show_no = 1;
