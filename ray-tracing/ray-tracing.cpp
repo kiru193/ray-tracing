@@ -7,6 +7,9 @@
 
 #define MAX_LOADSTRING 100
 
+#define BMPW 300
+#define BMPH 50
+
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
@@ -17,10 +20,6 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
-void DrawRect(HWND, POINTS, POINTS);
-TCHAR szClassName[] = TEXT("mouse01");
-POINTS start, end, oldend;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -130,9 +129,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
     PAINTSTRUCT ps;
 
-    TCHAR szBuf[32];
-	HBRUSH hBrush;
-	static BOOL bDraw;
+    int id;
+	static HDC hdc_men;
+	HBITMAP hBmp;
+	TCHAR szBuf[64], szUmu[8], szFormat[] = TEXT("(x = %d,y = %d)Capture = %s");
+	static BOOL bCap;
+	POINT pts;
 
     switch (message)
     {
@@ -154,50 +156,79 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
-	case WM_LBUTTONDOWN:
-		bDraw = TRUE;
-		oldend = start = MAKEPOINTS(lParam);
-		DrawRect(hWnd, start, oldend);
-		break;
-	case WM_MOUSEMOVE:
-		if (bDraw) {
-			end = MAKEPOINTS(lParam);
-			DrawRect(hWnd, start, oldend);
-			DrawRect(hWnd, start, end);
-			oldend = end;
-		}
-		else {
-			return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-		break;
-	case WM_LBUTTONUP:
-		if (bDraw) {
-			SetCursor(LoadCursor(NULL, IDC_ARROW));
-			DrawRect(hWnd, start, end);
-			bDraw = FALSE;
-
-            wsprintf(szBuf, TEXT("(%d,%d)-(%d,%d)"), start.x, start.y, end.x, end.y);
-			SetWindowText(hWnd, szBuf);
+	case WM_CREATE: 
+        {
 			hdc = GetDC(hWnd);
-			hBrush = (HBRUSH)GetStockObject(NULL_BRUSH);
-			SelectObject(hdc, hBrush);
-			Ellipse(hdc, start.x, start.y, end.x, end.y);
-			ReleaseDC(hWnd, hdc);
+		    hdc_men = CreateCompatibleDC(NULL);
+			hBmp = CreateCompatibleBitmap(hdc, BMPW, BMPH);
+			SelectObject(hdc_men, hBmp);
+			//PatBlt(hdc_men, 0, 0, BMPW, BMPH,WHITENESS);
+			wsprintf(szBuf, szFormat, 0, 0, TEXT("なし"));
+			TextOut(hdc_men, 10, 10, szBuf, lstrlen(szBuf));
+
+            ReleaseDC(hWnd, hdc);
+			DeleteObject(hBmp);
+	    }
+			break;
+	case WM_LBUTTONDOWN:
+			if (!bCap) {
+            
+                SetCapture(hWnd);
+				bCap = TRUE;
+            }
+			pts.x = LOWORD(lParam);
+			pts.y = HIWORD(lParam);
+
+            wsprintf(szBuf, szFormat, pts.x, pts.y, TEXT("有り"));
+			//PatBlt(hdc_men, 0, 0, BMPW, BMPH,WHITENESS);
+			TextOut(hdc_men, 10, 10, szBuf, lstrlen(szBuf));
+			InvalidateRect(hWnd, NULL, FALSE);
+
+        break;
+	case WM_LBUTTONUP:
+		if (bCap) {
+			ReleaseCapture();
+			bCap = FALSE;
+		}
+
+		pts.x = LOWORD(lParam);
+		pts.y = HIWORD(lParam);
+		
+        wsprintf(szBuf, szFormat, pts.x, pts.y, TEXT("無し"));
+		//PatBlt(hdc_men, 0, 0, BMPW, BMPH, WHITENESS);
+		TextOut(hdc_men, 10, 10, szBuf, lstrlen(szBuf));
+		InvalidateRect(hWnd, NULL, FALSE);
+		
+        break;
+	case WM_MOUSEMOVE:
+		pts.x = LOWORD(lParam);
+		pts.y = HIWORD(lParam);
+		if (bCap) {
+			lstrcpy(szUmu, TEXT("有り"));
 		}
 		else {
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			lstrcpy(szUmu, TEXT("無し"));
         }
+		wsprintf(szBuf, szFormat, pts.x, pts.y, szUmu);
+		//PatBlt(hdc_men, 0, 0, BMPW, BMPH, WHITENESS);
+		TextOut(hdc_men, 10, 10, szBuf, lstrlen(szBuf));
+		InvalidateRect(hWnd, NULL, FALSE);
 		break;
-    case WM_CREATE:
-
-			break;
     case WM_PAINT:
         {
             hdc = BeginPaint(hWnd, &ps);
             // TODO: HDC を使用する描画コードをここに追加してください.
+			BitBlt(hdc, 0, 0, BMPW, BMPH, hdc_men, 0, 0, SRCCOPY);
             EndPaint(hWnd, &ps);
         }
         break;
+	case WM_CLOSE: 
+        {
+			id = MessageBox(hWnd, TEXT("終了するぞ？"), TEXT("確認！"), MB_YESNO | MB_ICONQUESTION);
+		if (id == IDYES) {
+				DestroyWindow(hWnd);
+        }
+	    }
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -225,17 +256,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
-}
-
-void DrawRect(HWND hWnd, POINTS beg, POINTS end) {
-	HDC hdc;
-	hdc = GetDC(hWnd);
-	SetROP2(hdc, R2_NOT);
-
-    MoveToEx(hdc, beg.x, beg.y, NULL);
-	LineTo(hdc, end.x, beg.y);
-	LineTo(hdc, end.x, end.y);
-	LineTo(hdc, beg.x, end.y);
-	LineTo(hdc, beg.x, beg.y);
-	LineTo(hdc, end.x, end.y);
 }
