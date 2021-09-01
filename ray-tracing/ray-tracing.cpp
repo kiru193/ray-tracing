@@ -4,6 +4,8 @@
 #include "framework.h"
 #include "ray-tracing.h"
 #include <time.h>
+#include <windows.h>
+#include <Mmsystem.h>
 
 #define MAX_LOADSTRING 100
 
@@ -18,8 +20,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-LPCTSTR lpszClasName = TEXT("drag01");
-BOOL MyAdjustWindow(HWND, int, int);
+LPCTSTR lpszClassName = TEXT("playsound01");
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -129,15 +130,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
     PAINTSTRUCT ps;
 
-    int id, rcw = 80, rch = 40, mousex, mousey;
-	static int catw, cath;
-	static HDC hdc_mem, hdc_cat;
-	HBITMAP hBmp;
-	static HBITMAP hCat;
-	static RECT rc1, rc2;
-	static BOOL bDrag, bDragCat;
-	static POINT ptStart;
-	BITMAP bmp_info;
+    int id;
+	TCHAR szText[] = TEXT("クリックしてね☆");
 
     switch (message) {
 	case WM_COMMAND: {
@@ -155,104 +149,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	} break;
+	case WM_LBUTTONDOWN:
+		PlaySound(TEXT("sound1.wav"), NULL, SND_ASYNC | SND_FILENAME);
+        break;
 	case WM_CREATE:
-		MyAdjustWindow(hWnd, 600, 400);
-
-		hdc_mem = CreateCompatibleDC(NULL);
-		hdc = GetDC(hWnd);
-		hBmp = CreateCompatibleBitmap(hdc, 600, 400);
-		SelectObject(hdc_mem, hBmp);
-		PatBlt(hdc_mem, 0, 0, 600, 400, WHITENESS);
-		rc1.left = 10;
-		rc1.top = 10;
-		rc1.right = rc1.left + rcw;
-		rc1.bottom = rc1.top + rch;
-		Rectangle(hdc_mem, rc1.left, rc1.top, rc1.right, rc1.bottom);
-		hCat = (HBITMAP)LoadImage(hInst, TEXT("MANA1"), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
-		GetObject(hCat, (int)sizeof(bmp_info), &bmp_info);
-		catw = bmp_info.bmWidth;
-		cath = bmp_info.bmHeight;
-		hdc_cat = CreateCompatibleDC(NULL);
-		SelectObject(hdc_cat, hCat);
-		rc2.left = 100;
-		rc2.top = 100;
-		rc2.right = rc2.left + catw;
-		rc2.bottom = rc2.top + cath;
-		BitBlt(hdc_mem, rc2.left, rc2.top, catw, cath, hdc_cat, 0, 0, SRCCOPY);
-
-		DeleteObject(hBmp);
-		ReleaseDC(hWnd, hdc);
+		
 		break;
 	case WM_PAINT: {
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: HDC を使用する描画コードをここに追加してください.
-		BitBlt(hdc, 0, 0, 600, 400, hdc_mem, 0, 0, SRCCOPY);
+		TextOut(hdc, 20, 20, szText, lstrlen(szText));
 		EndPaint(hWnd, &ps);
 	} break;
-	case WM_LBUTTONDOWN: {
-		mousex = LOWORD(lParam);
-		mousey = HIWORD(lParam);
-		if (mousex > rc1.left && mousex < rc1.right && mousey > rc1.top && mousey < rc1.bottom)
-			bDrag = TRUE;
-
-		if (mousex > rc2.left && mousex < rc2.right && mousey > rc2.top && mousey < rc2.bottom)
-			bDragCat = TRUE;
-
-		if (!bDrag && !bDragCat)
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		ptStart.x = mousex;
-		ptStart.y = mousey;
-		SetCapture(hWnd);
-		break;
-	}
-	case WM_MOUSEMOVE:
-		if (!bDrag && !bDragCat)
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		mousex = LOWORD(lParam);
-		mousey = HIWORD(lParam);
-		if (bDrag) {
-			rc1.left += mousex - ptStart.x;
-			rc1.top += mousey - ptStart.y;
-			rc1.right = rc1.left + rcw;
-			rc1.bottom = rc1.top + rch;
-		}
-		if (bDragCat) {
-			rc2.left += mousex - ptStart.x;
-			rc2.top += mousey - ptStart.y;
-			rc2.right = rc2.left + catw;
-			rc2.bottom = rc2.top + cath;
-		}
-		PatBlt(hdc_mem, 0, 0, 600, 400, WHITENESS);
-		Rectangle(hdc_mem, rc1.left, rc1.top, rc1.right, rc1.bottom);
-		BitBlt(hdc_mem, rc2.left, rc2.top,catw,cath,hdc_cat,0,0,SRCCOPY);
-		InvalidateRect(hWnd, NULL, FALSE);
-		ptStart.x = mousex;
-		ptStart.y = mousey;	
-		break;
-	case WM_LBUTTONUP:
-		if (!bDrag && !bDragCat)
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		ReleaseCapture();
-		if (bDrag)
-			bDrag = FALSE;
-		if (bDragCat)
-			bDragCat = FALSE;
-		break;
 	case WM_CLOSE:
-		id = MessageBox(hWnd, TEXT("終了しても？"), TEXT("かっくに―ん"), MB_YESNO | MB_ICONQUESTION);
-		if (id == IDYES)
-			DestroyWindow(hWnd);
-		break;
+		id = MessageBox(hWnd, TEXT("終了しても？"), TEXT("確認"), MB_YESNO | MB_ICONQUESTION);
     case WM_DESTROY:
-		if (bDrag || bDragCat)
-			ReleaseCapture();
-		DeleteObject(hCat);
-		DeleteDC(hdc_mem);
-		DeleteDC(hdc_cat);
-		PostQuitMessage(0);
-
         PostQuitMessage(0);
         break;
     default:
@@ -279,24 +190,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
-}
-
-BOOL MyAdjustWindow(HWND hWnd, int bmpw, int bmph) {
-	RECT rc;
-	int x, y, w, h, winx, winy;
-
-	w = GetSystemMetrics(SM_CXSCREEN);
-	h = GetSystemMetrics(SM_CYSCREEN);
-
-	rc.left = 0;
-	rc.right = bmpw;
-	rc.top = 0;
-	rc.bottom = bmph;
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-	winx = rc.right - rc.left;
-	winy = rc.bottom - rc.top;
-	x = (w - winx) / 2;
-	y = (h - winy) / 2;
-	MoveWindow(hWnd, x, y, winx, winy, FALSE);
-	return TRUE;
 }
