@@ -150,7 +150,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	} break;
 	case WM_LBUTTONDOWN:
-		PlaySound(TEXT("MYWAVE"), NULL, SND_ASYNC | SND_RESOURCE);
+		PlaySound(TEXT("MYWAVE"), hInst, SND_ASYNC | SND_RESOURCE);
         break;
 	case WM_CREATE:
 		
