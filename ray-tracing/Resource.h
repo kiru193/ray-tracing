@@ -11,8 +11,9 @@
 #define IDI_RAYTRACING                  107
 #define IDI_SMALL                       108
 #define IDC_RAYTRACING                  109
-#define IDM_OPT1						110
-#define IDM_OPT2						111
+#define IDM_POPUP1						110
+#define IDM_POPUP2						111
+#define IDM_END							112
 #define IDR_MAINFRAME                   128
 #define JPGmana                         133
 #define PNGmana                         136
