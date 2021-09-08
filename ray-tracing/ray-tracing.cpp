@@ -4,12 +4,8 @@
 #include "framework.h"
 #include "ray-tracing.h"
 #include <time.h>
-#include <windows.h>
-#include <Mmsystem.h>
 
 #define MAX_LOADSTRING 100
-#define ID_PLAY 100
-#define ID_STOP 101
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -22,6 +18,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+HWND hParent;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -113,6 +110,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
+   hParent = hWnd;
    return TRUE;
 }
 
@@ -131,14 +129,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
     PAINTSTRUCT ps;
     
-    int id;
-	static MCI_OPEN_PARMS op;
-	MCI_STATUS_PARMS sp;
-	static HWND hPlay = 0, hStop = 0;
-	static BOOL bPlay = FALSE;
-	MCIERROR err;
-	TCHAR szErr[1024];
-
     switch (message) {
 	case WM_COMMAND: {
 		int wmId = LOWORD(wParam);
@@ -150,80 +140,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
-		case ID_PLAY:
-			sp.dwItem = MCI_STATUS_MEDIA_PRESENT;
-			err = mciSendCommand(op.wDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD)&sp);
-
-            if (err != 0) {
-				mciGetErrorString(err, szErr, (UINT)sizeof(szErr));
-				MessageBox(hWnd, szErr, TEXT("エラー"), MB_OK);
-				break;
-            }
-
-            if (!sp.dwReturn) {
-				MessageBox(hWnd, TEXT("not find CD!"), TEXT("error"), MB_OK);
-				break;
-            }
-
-            err = mciSendCommand(op.wDeviceID, MCI_PLAY, 0, 0);
-			if (err != 0) {
-				mciGetErrorString(err, szErr, (UINT)sizeof(szErr));
-				MessageBox(hWnd, szErr, TEXT("エラー"), MB_OK);
-				break;
-            }
-
-            EnableWindow(hPlay, FALSE);
-			EnableWindow(hStop, TRUE);
-			bPlay = TRUE;
+		case IDM_OPT1:
+			MessageBox(hWnd, TEXT("This is OPT1"), TEXT("OPT1 responce"), MB_OK);
 			break;
-
-		case ID_STOP:
-			err = mciSendCommand(op.wDeviceID, MCI_STOP, 0, 0);
-			if (err != 0) {
-				mciGetErrorString(err, szErr, (UINT)sizeof(szErr));
-				MessageBox(hWnd, szErr, TEXT("エラー"), MB_OK);
-				break;
-            }
-
-            EnableWindow(hStop, FALSE);
-			EnableWindow(hPlay, TRUE);
-			bPlay = FALSE;
+		case IDM_OPT2:
+			MessageBox(hWnd, TEXT("This is OPT2"), TEXT("OPT2 responce"), MB_OK);
 			break;
-
-
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	} break;
-
-	case WM_CREATE:
-		op.lpstrDeviceType = TEXT("cdaudio");
-		err = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_TYPE | MCI_WAIT, (DWORD_PTR)&op);
-
-        if (err != 0) {
-			mciGetErrorString(err, szErr, (UINT)sizeof(szErr));
-        }
-
-        hPlay = CreateWindow(TEXT("BUTTON"), TEXT("PLAY"), WS_CHILD | WS_VISIBLE, 10, 10, 100, 30, hWnd, (HMENU)ID_PLAY, hInst, NULL);
-		hStop = CreateWindow(TEXT("BUTTON"), TEXT("STOP"), WS_CHILD | WS_VISIBLE, 10, 50, 100, 30, hWnd, (HMENU)ID_STOP, hInst, NULL);
-		EnableWindow(hStop, FALSE);
-
-        break;
-
-	case WM_CLOSE:
-		id = MessageBox(hWnd, TEXT("終了しちゃうぞ☆"), TEXT("かっくに～ん"), MB_YESNO);
-		if (id == IDYES) {
-			if (bPlay) {
-				mciSendCommand(op.wDeviceID, MCI_STOP, 0, 0);
-            }
-			mciSendCommand(op.wDeviceID, MCI_CLOSE, 0, 0);
-			DestroyWindow(hStop);
-            DestroyWindow(hPlay);
-			
-			DestroyWindow(hWnd);
-			break;
-        }
-
 	case WM_PAINT: {
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: HDC を使用する描画コードをここに追加してください.
