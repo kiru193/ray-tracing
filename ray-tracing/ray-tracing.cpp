@@ -18,6 +18,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+BOOL CALLBACK MyDlgProc(HWND, UINT, WPARAM, LPARAM);
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -140,29 +142,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
-		case IDM_POPUP1:
-			MessageBox(hWnd, TEXT("ポップアップ1"), TEXT("POPUP1"), MB_OK);
-			break;
-		case IDM_POPUP2:
-			MessageBox(hWnd, TEXT("ポップアップ2"), TEXT("POPUP2"), MB_OK);
-			break;
-		case IDM_END:
-			SendMessage(hWnd, WM_CLOSE, 0, 0);
+		case IDM_DLG:
+			DialogBox(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	} break;
-	case WM_RBUTTONDOWN:
-		hMenu = LoadMenu(hInst, TEXT("MYPOPUP"));
-		hSubMenu = GetSubMenu(hMenu, 0);
-		pt.x = LOWORD(lParam);
-		pt.y = HIWORD(lParam);
-		ClientToScreen(hWnd, &pt);
 
-        TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, pt.x, pt.y, 0,hWnd, NULL);
-		DestroyMenu(hMenu);
-		break;
 	case WM_PAINT: {
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: HDC を使用する描画コードをここに追加してください.
@@ -196,4 +183,23 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+BOOL CALLBACK MyDlgProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp) {
+	switch (msg) {
+	case WM_COMMAND:
+		switch (LOWORD(wp)) {
+		case IDOK:
+			EndDialog(hDlg, IDOK);
+			return TRUE;
+		case IDCANCEL:
+			EndDialog(hDlg, IDCANCEL);
+			return TRUE;
+		default:
+			return FALSE;
+		}
+	default:
+		return FALSE;
+	}
+
 }

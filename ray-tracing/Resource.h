@@ -11,9 +11,7 @@
 #define IDI_RAYTRACING                  107
 #define IDI_SMALL                       108
 #define IDC_RAYTRACING                  109
-#define IDM_POPUP1						110
-#define IDM_POPUP2						111
-#define IDM_END							112
+#define IDM_DLG							110
 #define IDR_MAINFRAME                   128
 #define JPGmana                         133
 #define PNGmana                         136
@@ -23,6 +21,7 @@
 #define ID_PICTURE_32771                32771
 #define ID_PICTURE_32772                32772
 #define IDC_STATIC                      -1
+#define IDC_STATIC1						-1
 
 // Next default values for new objects
 // 
