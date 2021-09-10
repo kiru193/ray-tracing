@@ -25,6 +25,7 @@
 #define ID_PICTURE_32771                32771
 #define ID_PICTURE_32772                32772
 #define IDC_STATIC                      -1
+#define IDC_STATIC1						-1
 
 // Next default values for new objects
 // 

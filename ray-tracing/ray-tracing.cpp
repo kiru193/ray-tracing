@@ -47,14 +47,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_RAYTRACING));
 
     MSG msg;
+	BOOL bRet;
 
     // メイン メッセージ ループ:
-    while (GetMessage(&msg, nullptr, 0, 0))
+    while ((bRet = GetMessage(&msg, nullptr, 0, 0)) != 0)
     {
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+		if (bRet == -1) {
+			break;
+		}
+		else {
+			if (!hDlg || !IsDialogMessage(hDlg, &msg)) {
+				if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
 			}
+		}
     }
 
     return (int) msg.wParam;
@@ -149,8 +157,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SendMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
 		case IDM_DLG:
-			hDlg = CreateDialog(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
-			ShowWindow(hDlg, SW_NORMAL);
+			//DialogBox(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
+			hDlg = CreateDialog(hInst, TEXT("MYDLG"), NULL, (DLGPROC)MyDlgProc);
+			ShowWindow(hDlg, SW_SHOW);
 			break;
 		case IDM_CLOSEDLG:
 			DestroyWindow(hDlg);
@@ -232,13 +241,15 @@ BOOL CALLBACK MyDlgProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp) {
 		hParent = GetParent(hDlg);
 		return TRUE;
 	case WM_COMMAND:
-		switch (LOWORD(wp)) {
+		switch ((wp)) {
 		case IDOK:
 			GetDlgItemText(hDlg, IDC_EDIT1, szName, (int)sizeof(szName) - 1);
+			DestroyWindow(hDlg);
 			InvalidateRect(hParent, NULL, TRUE);
 			return TRUE;
 		case IDCANCEL:
 			SetDlgItemText(hDlg, IDC_EDIT1, TEXT(""));
+			DestroyWindow(hDlg);
 			return TRUE;
 		case IDC_CLOSE:
 			DestroyWindow(hDlg);
