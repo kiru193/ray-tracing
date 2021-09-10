@@ -17,8 +17,11 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-
 BOOL CALLBACK MyDlgProc(HWND, UINT, WPARAM, LPARAM);
+
+HWND hDlg;
+TCHAR szName[32];
+HWND hMain;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -48,11 +51,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // メイン メッセージ ループ:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
     }
 
     return (int) msg.wParam;
@@ -110,6 +112,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
+   hMain = hWnd;
    return TRUE;
 }
 
@@ -128,8 +131,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
     PAINTSTRUCT ps;
     
-    HMENU hMenu, hSubMenu;
-	POINT pt;
+    static HMENU hMenu;
+	TCHAR szBuf[64];
 
     switch (message) {
 	case WM_COMMAND: {
@@ -142,16 +145,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
+		case IDM_END:
+			SendMessage(hWnd, WM_CLOSE, 0, 0);
+			break;
 		case IDM_DLG:
-			DialogBox(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
+			hDlg = CreateDialog(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
+			ShowWindow(hDlg, SW_NORMAL);
+			break;
+		case IDM_CLOSEDLG:
+			DestroyWindow(hDlg);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 	} break;
+	case WM_CLOSE:
+		if (IsWindow(hWnd)) {
+			MessageBox(hWnd, TEXT("ダイアログを破棄します"), TEXT("破棄"), MB_OK);
+			DestroyWindow(hDlg);
+        }
+		DestroyWindow(hWnd);
+        break;
+	case WM_CREATE:
+		hMenu = GetMenu(hWnd);
+		break;
+	case WM_INITMENU:
+		if (IsWindow(hDlg)) {
+			EnableMenuItem(hMenu, IDM_DLG, MF_BYCOMMAND | MF_GRAYED);
+			EnableMenuItem(hMenu, IDM_CLOSEDLG, MF_BYCOMMAND | MF_ENABLED);
+
+        }
+		else {
+			EnableMenuItem(hMenu, IDM_DLG, MF_BYCOMMAND | MF_ENABLED);
+			EnableMenuItem(hMenu, IDM_CLOSEDLG, MF_BYCOMMAND | MF_GRAYED);
+        }
+		DrawMenuBar(hWnd);
+        break;
 
 	case WM_PAINT: {
-		hdc = BeginPaint(hWnd, &ps);
+		if (lstrcmp(szName, TEXT("")) == 0) {
+			lstrcpy(szBuf, TEXT("まだ名前の入力が有りません"));
+		}
+		else {
+			wsprintf(szBuf, TEXT("入力された氏名は%sさんです"), szName);
+		}
+        hdc = BeginPaint(hWnd, &ps);
+		TextOut(hdc, 10, 10, szBuf, lstrlen(szBuf));
+		
 		// TODO: HDC を使用する描画コードをここに追加してください.
 		EndPaint(hWnd, &ps);
 	} break;
@@ -186,20 +226,27 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 BOOL CALLBACK MyDlgProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp) {
+	static HWND hParent;
 	switch (msg) {
+	case WM_INITDIALOG:
+		hParent = GetParent(hDlg);
+		return TRUE;
 	case WM_COMMAND:
 		switch (LOWORD(wp)) {
 		case IDOK:
-			EndDialog(hDlg, IDOK);
+			GetDlgItemText(hDlg, IDC_EDIT1, szName, (int)sizeof(szName) - 1);
+			InvalidateRect(hParent, NULL, TRUE);
 			return TRUE;
 		case IDCANCEL:
-			EndDialog(hDlg, IDCANCEL);
+			SetDlgItemText(hDlg, IDC_EDIT1, TEXT(""));
+			return TRUE;
+		case IDC_CLOSE:
+			DestroyWindow(hDlg);
 			return TRUE;
 		default:
 			return FALSE;
+			break;
 		}
-	default:
 		return FALSE;
-	}
-
+    }
 }
