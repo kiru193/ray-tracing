@@ -6,6 +6,7 @@
 #include <time.h>
 
 #define MAX_LOADSTRING 100
+#define MY_WINDOW_STYLE (WS_OVERLAPPED)
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -27,6 +28,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: ここにコードを挿入してください。
+	
+
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -97,9 +100,18 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // グローバル変数にインスタンス ハンドルを格納する
-
-   HWND hWnd = CreateWindowW(szWindowClass, TEXT("しょ～きが～めん～"), WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+ 
+   HWND hWnd = CreateWindowW(szWindowClass, //クラス名
+                            TEXT("しょ～きが～めん～"), //ウィンドウ名
+	                        WS_POPUPWINDOW,	//ウィンドウスタイル
+                            0,//X位置
+                            0,//Y位置
+                            1000,//ウィンドウ幅
+                            1000, //ウィンドウ高さ
+                            nullptr,//親ウィンドウのハンドル，親を作るときはnullptr
+                            nullptr,//メニューハンドル，クラスメニューを使うときはnullptr
+                            hInstance,//インスタンスハンドル
+                            nullptr);//ウィンドウ作成データ
 
    if (!hWnd)
    {
@@ -162,7 +174,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			hdc_men = CreateCompatibleDC(hdc);//メモリデバイスコンテキストやらを生成
 			SelectObject(hdc_men, hBmp);
 			BitBlt(hdc, 0, 0, w, h, hdc_men, 0, 0, SRCCOPY);
-			StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
+			//StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
 			DeleteDC(hdc_men);
 			DeleteObject(hBmp);
 
