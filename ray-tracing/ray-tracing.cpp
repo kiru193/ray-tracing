@@ -4,9 +4,9 @@
 #include "framework.h"
 #include "ray-tracing.h"
 #include <time.h>
+#include <windows.h>
 
 #define MAX_LOADSTRING 100
-#define MY_WINDOW_STYLE (WS_OVERLAPPED)
 
 // グローバル変数:
 HINSTANCE hInst;                                // 現在のインターフェイス
@@ -19,6 +19,11 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+	
+HMONITOR hMonitor;//モニター情報を取得するためのハンドル
+MONITORINFOEX MonitorInfoEx;
+POINT pt = { 0, 0 };
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -29,7 +34,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: ここにコードを挿入してください。
 	
-
+    hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+	MonitorInfoEx.cbSize = sizeof(MonitorInfoEx);
+	GetMonitorInfo(hMonitor, &MonitorInfoEx);
 
     // グローバル文字列を初期化する
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -106,8 +113,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	                        WS_POPUPWINDOW,	//ウィンドウスタイル
                             0,//X位置
                             0,//Y位置
-                            1000,//ウィンドウ幅
-                            1000, //ウィンドウ高さ
+                            MonitorInfoEx.rcMonitor.right,//ウィンドウ幅
+                            MonitorInfoEx.rcMonitor.bottom, //ウィンドウ高さ
                             nullptr,//親ウィンドウのハンドル，親を作るときはnullptr
                             nullptr,//メニューハンドル，クラスメニューを使うときはnullptr
                             hInstance,//インスタンスハンドル
@@ -141,6 +148,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	BITMAP bmp_info;
 	int w, h;
 
+
     switch (message)
     {
     case WM_COMMAND:
@@ -173,7 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			h = bmp_info.bmHeight;
 			hdc_men = CreateCompatibleDC(hdc);//メモリデバイスコンテキストやらを生成
 			SelectObject(hdc_men, hBmp);
-			BitBlt(hdc, 0, 0, w, h, hdc_men, 0, 0, SRCCOPY);
+			BitBlt(hdc, MonitorInfoEx.rcMonitor.right/2-w/2, MonitorInfoEx.rcMonitor.bottom/2-h/2, w, h, hdc_men, 0, 0, SRCCOPY);
 			//StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
 			DeleteDC(hdc_men);
 			DeleteObject(hBmp);
