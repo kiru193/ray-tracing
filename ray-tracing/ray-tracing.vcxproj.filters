@@ -60,4 +60,7 @@
       <Filter>リソース ファイル</Filter>
     </Media>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="テキスト.txt" />
+  </ItemGroup>
 </Project>

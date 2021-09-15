@@ -163,6 +163,9 @@
   <ItemGroup>
     <Media Include="music\sound1.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="テキスト.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
