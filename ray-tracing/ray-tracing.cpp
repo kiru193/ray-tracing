@@ -22,7 +22,8 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 	
 HMONITOR hMonitor;//モニター情報を取得するためのハンドル
 MONITORINFOEX MonitorInfoEx;
-POINT pt = { 0, 0 };
+POINT pt = { 1920, 0 };
+RECT rc = { 1920, 0, 2*1919, 1080 };
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -35,6 +36,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: ここにコードを挿入してください。
 	
     hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
+	//hMonitor = MonitorFromRect(&rc, MONITOR_DEFAULTTONEAREST);
 	MonitorInfoEx.cbSize = sizeof(MonitorInfoEx);
 	GetMonitorInfo(hMonitor, &MonitorInfoEx);
 
@@ -111,8 +113,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    HWND hWnd = CreateWindowW(szWindowClass, //クラス名
                             TEXT("しょ～きが～めん～"), //ウィンドウ名
 	                        WS_POPUPWINDOW,	//ウィンドウスタイル
-                            0,//X位置
-                            0,//Y位置
+                            MonitorInfoEx.rcMonitor.left,//X位置
+                            MonitorInfoEx.rcMonitor.top,//Y位置
                             MonitorInfoEx.rcMonitor.right,//ウィンドウ幅
                             MonitorInfoEx.rcMonitor.bottom, //ウィンドウ高さ
                             nullptr,//親ウィンドウのハンドル，親を作るときはnullptr
@@ -181,7 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			h = bmp_info.bmHeight;
 			hdc_men = CreateCompatibleDC(hdc);//メモリデバイスコンテキストやらを生成
 			SelectObject(hdc_men, hBmp);
-			BitBlt(hdc, MonitorInfoEx.rcMonitor.right/2-w/2, MonitorInfoEx.rcMonitor.bottom/2-h/2, w, h, hdc_men, 0, 0, SRCCOPY);
+			BitBlt(hdc, (MonitorInfoEx.rcMonitor.right - MonitorInfoEx.rcMonitor.left) / 2 - w / 2, (MonitorInfoEx.rcMonitor.bottom - MonitorInfoEx.rcMonitor.top) / 2 - h / 2, w, h, hdc_men, 0, 0, SRCCOPY);
 			//StretchBlt(hdc, w, 0, w * 2, h * 2, hdc_men, 0, 0, w, h, SRCCOPY);
 			DeleteDC(hdc_men);
 			DeleteObject(hBmp);
