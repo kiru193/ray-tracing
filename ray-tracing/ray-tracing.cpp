@@ -17,7 +17,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK MyDlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK MyDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 HWND hDlg;
 TCHAR szName[32];
@@ -143,31 +143,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	TCHAR szBuf[64];
 
     switch (message) {
-	case WM_COMMAND: {
-		int wmId = LOWORD(wParam);
-		// 選択されたメニューの解析:
-		switch (wmId) {
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
-		case IDM_END:
-			SendMessage(hWnd, WM_CLOSE, 0, 0);
-			break;
-		case IDM_DLG:
-			//DialogBox(hInst, TEXT("MYDLG"), hWnd, (DLGPROC)MyDlgProc);
-			hDlg = CreateDialog(hInst, TEXT("MYDLG"), NULL, (DLGPROC)MyDlgProc);
-			ShowWindow(hDlg, SW_SHOW);
-			break;
-		case IDM_CLOSEDLG:
-			DestroyWindow(hDlg);
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-	} break;
+		case WM_COMMAND: {
+			int wmId = LOWORD(wParam);
+			// 選択されたメニューの解析:
+			switch (wmId) {
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
+			case IDM_END:
+				SendMessage(hWnd, WM_CLOSE, 0, 0);
+				break;
+			case IDM_DLG:
+				//DialogBox(hInst, MAKEINTRESOURCE(MYDLG), hWnd, MyDlgProc);
+				hDlg = CreateDialog(hInst, MAKEINTRESOURCE(MYDLG), hWnd, MyDlgProc);
+				ShowWindow(hDlg, SW_NORMAL);
+				break;
+			case IDM_CLOSEDLG:
+				DestroyWindow(hDlg);
+				break;
+			default:
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+		} break;
 	case WM_CLOSE:
 		if (IsWindow(hWnd)) {
 			MessageBox(hWnd, TEXT("ダイアログを破棄します"), TEXT("破棄"), MB_OK);
@@ -234,30 +234,29 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-BOOL CALLBACK MyDlgProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp) {
+INT_PTR CALLBACK MyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {	
 	static HWND hParent;
-	switch (msg) {
-	case WM_INITDIALOG:
-		hParent = GetParent(hDlg);
-		return TRUE;
-	case WM_COMMAND:
-		switch ((wp)) {
-		case IDOK:
-			GetDlgItemText(hDlg, IDC_EDIT1, szName, (int)sizeof(szName) - 1);
-			DestroyWindow(hDlg);
-			InvalidateRect(hParent, NULL, TRUE);
-			return TRUE;
-		case IDCANCEL:
-			SetDlgItemText(hDlg, IDC_EDIT1, TEXT(""));
-			DestroyWindow(hDlg);
-			return TRUE;
-		case IDC_CLOSE:
-			DestroyWindow(hDlg);
-			return TRUE;
-		default:
-			return FALSE;
-			break;
+	switch (message) {
+		case WM_INITDIALOG:
+			hParent = GetParent(hDlg);
+			return (INT_PTR)TRUE;
+			
+		case WM_COMMAND: {
+			switch (LOWORD(wParam)) {
+			case IDOK:
+				GetDlgItemText(hDlg, IDC_EDIT1, szName, (int)sizeof(szName) - 1);
+				DestroyWindow(hDlg);
+				InvalidateRect(hParent, NULL, TRUE);
+				return TRUE;
+			case IDCANCEL:
+				SetDlgItemText(hDlg, IDC_EDIT1, TEXT(""));
+				return TRUE;
+			case IDC_CLOSE:
+				DestroyWindow(hDlg);
+				return TRUE;
+			}
 		}
-		return FALSE;
+	return FALSE;
     }
+return FALSE;	
 }

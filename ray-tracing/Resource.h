@@ -16,6 +16,7 @@
 #define IDM_CLOSEDLG					112
 #define IDM_END							113
 #define IDC_EDIT1						114
+#define MYDLG							115
 #define IDR_MAINFRAME                   128
 #define JPGmana                         133
 #define PNGmana                         136
