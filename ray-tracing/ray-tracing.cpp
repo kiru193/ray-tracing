@@ -12,6 +12,8 @@
 HINSTANCE hInst;                                // 現在のインターフェイス
 WCHAR szTitle[MAX_LOADSTRING];                  // タイトル バーのテキスト
 WCHAR szWindowClass[MAX_LOADSTRING];            // メイン ウィンドウ クラス名
+//二つ目のウィンドウのパラメータ
+LPCWSTR szWindowClass2 = L"Second Window";
 
 // このコード モジュールに含まれる関数の宣言を転送します:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -19,6 +21,8 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+ATOM MyRegisterClass2(HINSTANCE hInstance);
+LRESULT CALLBACK WndProc2(HWND, UINT, WPARAM, LPARAM);
 	
 HMONITOR hMonitor;//モニター情報を取得するためのハンドル
 MONITORINFOEX MonitorInfoEx;
@@ -34,7 +38,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: ここにコードを挿入してください。
-	
+	MyRegisterClass2(hInstance);
+
     hMonitor = MonitorFromPoint(pt, MONITOR_DEFAULTTONEAREST);
 	//hMonitor = MonitorFromRect(&rc, MONITOR_DEFAULTTONEAREST);
 	MonitorInfoEx.cbSize = sizeof(MonitorInfoEx);
@@ -95,7 +100,26 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
     return RegisterClassExW(&wcex);
 }
+//二つ目のウィンドクラスの登録
+ATOM MyRegisterClass2(HINSTANCE hInstance) {
+	WNDCLASSEXW wcex;
 
+	wcex.cbSize = sizeof(WNDCLASSEX);
+
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = WndProc2;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_RAYTRACING));
+	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 3);
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_RAYTRACING);
+	wcex.lpszClassName = szWindowClass2;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+	return RegisterClassExW(&wcex);
+}
 //
 //   関数: InitInstance(HINSTANCE, int)
 //
@@ -110,17 +134,29 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // グローバル変数にインスタンス ハンドルを格納する
  
-   HWND hWnd = CreateWindowW(szWindowClass, //クラス名
-                            TEXT("しょ～きが～めん～"), //ウィンドウ名
-	                        WS_POPUPWINDOW,	//ウィンドウスタイル
-                            MonitorInfoEx.rcMonitor.left,//X位置
-                            MonitorInfoEx.rcMonitor.top,//Y位置
-                            MonitorInfoEx.rcMonitor.right,//ウィンドウ幅
-                            MonitorInfoEx.rcMonitor.bottom, //ウィンドウ高さ
-                            nullptr,//親ウィンドウのハンドル，親を作るときはnullptr
-                            nullptr,//メニューハンドル，クラスメニューを使うときはnullptr
-                            hInstance,//インスタンスハンドル
-                            nullptr);//ウィンドウ作成データ
+   HWND hWnd = CreateWindowW(szWindowClass,	  //クラス名
+	   TEXT("しょ～きが～めん～"),			  //ウィンドウ名
+	   WS_OVERLAPPEDWINDOW,					  //ウィンドウスタイル
+	   CW_USEDEFAULT,						  //X位置
+	   0,									  //Y位置
+	   CW_USEDEFAULT,						  //ウィンドウ幅
+	   0,									  //ウィンドウ高さ
+	   nullptr,								  //親ウィンドウのハンドル，親を作るときはnullptr
+	   nullptr,								  //メニューハンドル，クラスメニューを使うときはnullptr
+	   hInstance,							  //インスタンスハンドル
+	   nullptr);							  //ウィンドウ作成データ
+
+   HWND hWnd2 = CreateWindowW(szWindowClass2, //クラス名
+	   TEXT("しょ～きが～めん～"),			//ウィンドウ名
+	   WS_OVERLAPPEDWINDOW,					//ウィンドウスタイル
+	   MonitorInfoEx.rcMonitor.left,		//X位置
+	   MonitorInfoEx.rcMonitor.top,			//Y位置
+	   MonitorInfoEx.rcMonitor.right,		//ウィンドウ幅
+	   MonitorInfoEx.rcMonitor.bottom,		//ウィンドウ高さ
+	   nullptr,								//親ウィンドウのハンドル，親を作るときはnullptr
+	   nullptr,								//メニューハンドル，クラスメニューを使うときはnullptr
+	   hInstance,							//インスタンスハンドル
+	   nullptr);							//ウィンドウ作成データ
 
    if (!hWnd)
    {
@@ -129,6 +165,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
+
+   ShowWindow(hWnd2, nCmdShow);
+   UpdateWindow(hWnd2);
    return TRUE;
 }
 
@@ -198,6 +237,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
+}
+
+//二つ目のウィンドウのCallBack
+LRESULT CALLBACK WndProc2(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	int wmId, wmEvent;
+	PAINTSTRUCT ps;
+	HDC hdc;
+
+	switch (message) {
+	case WM_COMMAND:
+		wmId = LOWORD(wParam);
+		wmEvent = HIWORD(wParam);
+		// 選択されたメニューの解析:
+		switch (wmId) {
+		case IDM_ABOUT:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+			break;
+		case IDM_EXIT:
+			DestroyWindow(hWnd);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		// TODO: 描画コードをここに追加してください...
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
 }
 
 // バージョン情報ボックスのメッセージ ハンドラーです。
